@@ -1,4 +1,4 @@
-unit Horse.JWT;
+﻿unit Horse.JWT;
 
 {$IF DEFINED(FPC)}
   {$MODE DELPHI}{$H+}
@@ -39,6 +39,7 @@ uses
 
 type
   TSkipWhen = reference to function(const APath: string; const AMethod: TMethodType): Boolean;
+
   TSkipRouteMethod = record
     Route: string;
     Method: TMethodType;
@@ -47,9 +48,9 @@ type
 
   TSkipRouteMethods = TArray<TSkipRouteMethod>;
   {$IF DEFINED(FPC)}
-  TOnResponse = {$IF DEFINED(HORSE_FPC_FUNCTIONREFERENCES)}reference to {$ENDIF}procedure(const AHorseResponse: THorseResponse; const AMessage: string; const AHTTPStatus: THTTPStatus; const APathInfo: string);
+    TOnResponse = {$IF DEFINED(HORSE_FPC_FUNCTIONREFERENCES)}reference to {$ENDIF}procedure(const AHorseResponse: THorseResponse; const AMessage: string; const AHTTPStatus: THTTPStatus; const APathInfo: string);
   {$ELSE}
-  TOnResponse = reference to procedure(const AHorseResponse: THorseResponse; const AMessage: string; const AHTTPStatus: THTTPStatus; const APathInfo: string);
+    TOnResponse = reference to procedure(const AHorseResponse: THorseResponse; const AMessage: string; const AHTTPStatus: THTTPStatus; const APathInfo: string);
   {$ENDIF}
 
   IHorseJWTConfig = interface
@@ -60,7 +61,8 @@ type
     function SkipWhen: TSkipWhen; overload;
     function SkipWhen(const AValue: TSkipWhen): IHorseJWTConfig; overload;
     function SkipRouteMethods: TSkipRouteMethods; overload;
-    function SkipRouteMethods(const AValue: TSkipRouteMethods): IHorseJWTConfig; overload;    function Header: string; overload;
+    function SkipRouteMethods(const AValue: TSkipRouteMethods): IHorseJWTConfig; overload;
+    function Header: string; overload;
     function Header(const AValue: string): IHorseJWTConfig; overload;
     function IsRequiredSubject: Boolean; overload;
     function IsRequiredSubject(const AValue: Boolean): IHorseJWTConfig; overload;
@@ -216,8 +218,7 @@ begin
 
   for var I := 0 to High(LConfig.SkipRouteMethods) do
   begin
-    if MatchRoute(LPathInfo, [LConfig.SkipRouteMethods[I].Route]) and
-       (AHorseRequest.MethodType = LConfig.SkipRouteMethods[I].Method) then
+    if MatchRoute(LPathInfo, [LConfig.SkipRouteMethods[I].Route]) and (AHorseRequest.MethodType = LConfig.SkipRouteMethods[I].Method) then
     begin
       ANext();
       Exit;
@@ -226,7 +227,7 @@ begin
 
   if Assigned(LConfig.SkipWhen) then
   begin
-    if LConfig.SkipWhen()(LPathInfo,AHorseRequest.MethodType) then
+    if LConfig.SkipWhen()(LPathInfo, AHorseRequest.MethodType) then
     begin
       ANext();
       Exit;
@@ -570,19 +571,16 @@ begin
   Result := FSkipRouteMethods;
 end;
 
-function THorseJWTConfig.SkipRouteMethods(
-  const AValue: TSkipRouteMethods): IHorseJWTConfig;
+function THorseJWTConfig.SkipRouteMethods(const AValue: TSkipRouteMethods): IHorseJWTConfig;
 var
   I: Integer;
 begin
   FSkipRouteMethods := AValue;
-
-  // نرمال‌سازی مثل SkipRoutes
   for I := 0 to High(FSkipRouteMethods) do
-    if (FSkipRouteMethods[I].Route <> '') and
-       (FSkipRouteMethods[I].Route[1] <> '/') then
+  begin
+    if (FSkipRouteMethods[I].Route <> '') and (FSkipRouteMethods[I].Route[1] <> '/') then
       FSkipRouteMethods[I].Route := '/' + FSkipRouteMethods[I].Route;
-
+  end;
   Result := Self;
 end;
 
