@@ -160,6 +160,7 @@ var
   LValidations: IJOSEConsumer;
   LJWT: TJOSEContext;
 {$ENDIF}
+  I: Integer;
   LPathInfo: string;
   LToken, LHeaderNormalize: string;
   LSession: TObject;
@@ -216,7 +217,7 @@ begin
   if LPathInfo = EmptyStr then
     LPathInfo := '/';
 
-  for var I := 0 to High(LConfig.SkipRouteMethods) do
+  for I := 0 to High(LConfig.SkipRouteMethods) do
   begin
     if MatchRoute(LPathInfo, [LConfig.SkipRouteMethods[I].Route]) and (AHorseRequest.MethodType = LConfig.SkipRouteMethods[I].Method) then
     begin
